@@ -28,9 +28,9 @@ phases:
       - docker push $REPOSITORY_URI:latest
       - docker push $REPOSITORY_URI:$IMAGE_TAG
       - echo Updating deployment.yaml with image...
-      - export FULL_IMAGE="$REPOSITORY_URI:$IMAGE_TAG"
-      - sed -i "s|image: .*|image: $FULL_IMAGE|" deployment.yaml
-      - cat deployment.yaml  # debug print
+      - |
+        sed -i "s|image: .*|image: $REPOSITORY_URI:$IMAGE_TAG|" deployment.yaml
+      - cat deployment.yaml
 
   post_build:
     commands:
