@@ -7,6 +7,8 @@ phases:
       - aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin 864981742651.dkr.ecr.ap-south-1.amazonaws.com
       - REPOSITORY_URI=864981742651.dkr.ecr.ap-south-1.amazonaws.com/brain-tasks-app
       - IMAGE_TAG=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
+      - echo Setting up kubeconfig for EKS...
+      - aws eks update-kubeconfig --region ap-south-1 --name brain-cluster
 
   build:
     commands:
@@ -21,8 +23,8 @@ phases:
       - echo Pushing the Docker image...
       - docker push $REPOSITORY_URI:latest
       - docker push $REPOSITORY_URI:$IMAGE_TAG
-      - echo Writing image definitions file...
-      - printf '[{"name":"brain-tasks","imageUri":"%s"}]' $REPOSITORY_URI:$IMAGE_TAG > imagedefinitions.json
-
-artifacts:
-  files: imagedefinitions.json
+      - echo Updating deployment.yaml with image tag...
+      - 'sed -i "s|image: .*|image: $REPOSITORY_URI:$IMAGE_TAG|" deployment.yaml'
+      - echo Applying Kubernetes manifests...
+      - kubectl apply -f deployment.yaml
+      - echo Deployment to EKS complete.
