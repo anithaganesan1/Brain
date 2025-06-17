@@ -15,17 +15,17 @@ phases:
 
   build:
     commands:
-      - echo Building Docker image...
+      - echo "Building Docker image..."
       - docker build -t $REPOSITORY_URI:latest .
       - docker tag $REPOSITORY_URI:latest $REPOSITORY_URI:$IMAGE_TAG
-      - echo Pushing Docker image to ECR...
+      - echo "Pushing Docker image to ECR..."
       - docker push $REPOSITORY_URI:latest
       - docker push $REPOSITORY_URI:$IMAGE_TAG
-      - echo Updating Kubernetes deployment YAML with new image...
+      - echo "Updating Kubernetes deployment YAML..."
       - sed -i "s|image:.*|image: $REPOSITORY_URI:$IMAGE_TAG|" deployment.yaml
 
   post_build:
     commands:
-      - echo Applying Kubernetes deployment...
+      - echo "Applying Kubernetes deployment..."
       - kubectl apply -f deployment.yaml
-      - echo Build and deploy complete.
+      - echo "Build and deploy complete."
