@@ -9,8 +9,9 @@ phases:
       - IMAGE_TAG=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
       - echo Setting up kubeconfig for EKS...
       - mkdir -p $HOME/.kube
-      - aws eks update-kubeconfig --region ap-south-1 --name brain-cluster --kubeconfig $HOME/.kube/config
+      - aws eks update-kubeconfig --name brain-cluster --region ap-south-1 --kubeconfig $HOME/.kube/config
       - export KUBECONFIG=$HOME/.kube/config
+      - echo Kubeconfig setup complete.
 
   build:
     commands:
@@ -30,4 +31,5 @@ phases:
       - echo Applying Kubernetes manifests...
       - kubectl apply -f deployment.yaml --validate=false
       - echo Deployment to EKS complete
+      - echo Fetching pods for verification...
       - kubectl get pods
