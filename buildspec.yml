@@ -1,5 +1,9 @@
 version: 0.2
 
+env:
+  variables:
+    IMAGE_TAG: "latest"
+
 phases:
   install:
     runtime-versions:
@@ -9,28 +13,25 @@ phases:
       - curl -o kubectl https://amazon-eks.s3.ap-south-1.amazonaws.com/1.32.0/2024-05-01/bin/linux/amd64/kubectl
       - chmod +x ./kubectl
       - mv ./kubectl /usr/local/bin/kubectl
-      - echo Installing AWS CLI...
       - pip install --upgrade awscli
 
   pre_build:
     commands:
-      - echo Logging in to Amazon ECR...
-      - aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin $REPOSITORY_URI
       - echo Setting up kubeconfig...
       - aws eks update-kubeconfig --region ap-south-1 --name brain-cluster
+      - echo Logging in to Amazon ECR...
+      - aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin $REPOSITORY_URI
 
   build:
     commands:
       - echo Building Docker image...
       - docker build -t $REPOSITORY_URI:latest .
       - docker tag $REPOSITORY_URI:latest $REPOSITORY_URI:$IMAGE_TAG
-      - echo Pushing Docker images to ECR...
+      - echo Pushing Docker image to ECR...
       - docker push $REPOSITORY_URI:latest
       - docker push $REPOSITORY_URI:$IMAGE_TAG
-      - echo Updating deployment.yaml with image...
-      - |
-        sed -i "s|image: .*|image: $REPOSITORY_URI:$IMAGE_TAG|" deployment.yaml
-      - cat deployment.yaml
+      - echo Updating deployment.yaml with image tag...
+      - sed -i "s|image:.*|image: $REPOSITORY_URI:$IMAGE_TAG|" deployment.yaml
 
   post_build:
     commands:
