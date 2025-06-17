@@ -6,14 +6,20 @@ phases:
       docker: 20
     commands:
       - echo Installing dependencies...
-      - curl -o kubectl https://amazon-eks.s3.ap-south-1.amazonaws.com/1.29.0/2024-04-03/bin/linux/amd64/kubectl
-      - chmod +x ./kubectl
-      - mv ./kubectl /usr/local/bin
+      - yum install -y jq unzip curl
+      - echo Downloading kubectl...
+      - curl -LO "https://dl.k8s.io/release/v1.29.0/bin/linux/amd64/kubectl"
+      - chmod +x kubectl
+      - mv kubectl /usr/local/bin/
+      - kubectl version --client || echo "kubectl installed"
 
   pre_build:
     commands:
-      - echo Logging in to Docker Hub...
-      - echo "$DOCKERHUB_PASSWORD" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
+      - echo Retrieving Docker Hub credentials from Secrets Manager...
+      - export DOCKERHUB_USERNAME=$(echo $DOCKERHUB_SECRET | jq -r '.DOCKERHUB_USERNAME')
+      - export DOCKERHUB_PASSWORD=$(echo $DOCKERHUB_SECRET | jq -r '.DOCKERHUB_PASSWORD')
+      - echo Logging into Docker Hub...
+      - echo "$DOCKERHUB_PASSWORD" | docker login --username "$DOCKERHUB_USERNAME" --password-stdin
 
       - echo Logging in to Amazon ECR...
       - aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin $REPOSITORY_URI
@@ -32,10 +38,8 @@ phases:
       - docker push $REPOSITORY_URI:latest
       - docker push $REPOSITORY_URI:$IMAGE_TAG
 
-      - echo Build and push complete.
-      - echo Updating kubeconfig..
+      - echo Updating kubeconfig...
       - aws eks update-kubeconfig --region ap-south-1 --name brain-cluster
-
 
       - echo Deploying to EKS...
       - kubectl apply -f deployment.yaml
