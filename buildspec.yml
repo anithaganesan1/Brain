@@ -44,8 +44,8 @@ phases:
       - echo Deploying to EKS...
       - kubectl apply -f deployment.yaml
       - kubectl apply -f service.yaml
-  artifacts:
-    files:
+artifacts:
+  files:
     - appspec.yaml
     - deployment.yaml
     - service.yaml
