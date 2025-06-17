@@ -9,7 +9,7 @@ phases:
   pre_build:
     commands:
       - echo Logging in to Amazon ECR...
-      - aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin $REPOSITORY_URI
+      - echo $(aws ecr get-login-password --region ap-south-1) | docker login --username AWS --password-stdin $REPOSITORY_URI
       - echo Setting up kubeconfig for EKS...
       - aws eks update-kubeconfig --region ap-south-1 --name brain-cluster
 
