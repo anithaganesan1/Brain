@@ -8,9 +8,9 @@ phases:
       - REPOSITORY_URI=864981742651.dkr.ecr.ap-south-1.amazonaws.com/brain-tasks-app
       - IMAGE_TAG=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
       - echo Setting up kubeconfig for EKS...
-      - mkdir -p /root/.kube
-      - aws eks update-kubeconfig --region ap-south-1 --name brain-cluster --kubeconfig /root/.kube/config
-      - export KUBECONFIG=/root/.kube/config
+      - mkdir -p $HOME/.kube
+      - aws eks update-kubeconfig --region ap-south-1 --name brain-cluster --kubeconfig $HOME/.kube/config
+      - export KUBECONFIG=$HOME/.kube/config
 
   build:
     commands:
@@ -29,5 +29,5 @@ phases:
       - 'sed -i "s|image: .*|image: $REPOSITORY_URI:$IMAGE_TAG|" deployment.yaml'
       - echo Applying Kubernetes manifests...
       - kubectl apply -f deployment.yaml --validate=false
+      - echo Deployment to EKS complete
       - kubectl get pods
-      - echo Deployment to EKS complete...
