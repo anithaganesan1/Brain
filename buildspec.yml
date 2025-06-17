@@ -14,8 +14,8 @@ phases:
   pre_build:
     commands:
       - echo Using Docker Hub credentials from Secrets Manager...
-      - export DOCKERHUB_USERNAME=$(echo $DOCKERHUB_SECRET | jq -r '.DOCKERHUB_USERNAME')
-      - export DOCKERHUB_PASSWORD=$(echo $DOCKERHUB_SECRET | jq -r '.DOCKERHUB_PASSWORD')
+      - export "DOCKERHUB_USERNAME"=$(echo $DOCKERHUB_SECRET | jq -r '.DOCKERHUB_USERNAME')
+      - export "DOCKERHUB_PASSWORD"=$(echo $DOCKERHUB_SECRET | jq -r '.DOCKERHUB_PASSWORD')
 
       - echo Logging in to Docker Hub...
       - echo "$DOCKERHUB_PASSWORD" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
