@@ -33,8 +33,9 @@ phases:
       - docker push $REPOSITORY_URI:$IMAGE_TAG
 
       - echo Build and push complete.
-      - echo Updating kubeconfig...
-      - aws eks update-kubeconfig --region ap-south-1 --name brain-tasks-cluster
+      - echo Updating kubeconfig..
+      - aws eks update-kubeconfig --region ap-south-1 --name brain-cluster
+
 
       - echo Deploying to EKS...
       - kubectl apply -f deployment.yaml
