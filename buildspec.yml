@@ -7,10 +7,16 @@ phases:
     commands:
       - echo Installing dependencies...
       - yum install -y jq
+      - curl -o kubectl https://s3.amazonaws.com/aws-cli/awscli-bundle.zip
+      - curl -o kubectl https://amazon-eks.s3.ap-south-1.amazonaws.com/1.29.0/2024-04-03/bin/linux/amd64/kubectl
+      - chmod +x ./kubectl
+      - mv ./kubectl /usr/local/bin
 
   pre_build:
     commands:
       - echo Using Docker Hub credentials from Secrets Manager...
+      - export DOCKERHUB_USERNAME=$(echo $DOCKERHUB_SECRET | jq -r '.DOCKERHUB_USERNAME')
+      - export DOCKERHUB_PASSWORD=$(echo $DOCKERHUB_SECRET | jq -r '.DOCKERHUB_PASSWORD')
 
       - echo Logging in to Docker Hub...
       - echo "$DOCKERHUB_PASSWORD" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
@@ -33,3 +39,14 @@ phases:
       - docker push $REPOSITORY_URI:$IMAGE_TAG
 
       - echo Build and push complete.
+      - echo Updating kubeconfig...
+      - aws eks update-kubeconfig --region ap-south-1 --name brain-tasks-cluster
+
+      - echo Deploying to EKS...
+      - kubectl apply -f deployment.yaml
+      - kubectl apply -f service.yaml
+  artifacts:
+    files:
+    - appspec.yaml
+    - deployment.yaml
+    - service.yaml
