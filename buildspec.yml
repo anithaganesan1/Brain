@@ -7,7 +7,6 @@ phases:
     commands:
       - echo Installing dependencies...
       - yum install -y jq
-      - curl -o kubectl https://s3.amazonaws.com/aws-cli/awscli-bundle.zip
       - curl -o kubectl https://amazon-eks.s3.ap-south-1.amazonaws.com/1.29.0/2024-04-03/bin/linux/amd64/kubectl
       - chmod +x ./kubectl
       - mv ./kubectl /usr/local/bin
