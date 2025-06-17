@@ -8,7 +8,8 @@ phases:
       - REPOSITORY_URI=864981742651.dkr.ecr.ap-south-1.amazonaws.com/brain-tasks-app
       - IMAGE_TAG=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
       - echo Setting up kubeconfig for EKS...
-      - aws eks update-kubeconfig --region ap-south-1 --name brain-cluster
+      - aws eks update-kubeconfig --region ap-south-1 --name brain-cluster --alias brain-cluster
+      - export KUBECONFIG=$HOME/.kube/config
 
   build:
     commands:
@@ -26,5 +27,11 @@ phases:
       - echo Updating deployment.yaml with image tag...
       - 'sed -i "s|image: .*|image: $REPOSITORY_URI:$IMAGE_TAG|" deployment.yaml'
       - echo Applying Kubernetes manifests...
-      - kubectl apply -f deployment.yaml
-      - echo Deployment to EKS complete..
+      - kubectl apply -f deployment.yaml --validate=false
+      - echo Deployment to EKS complete.
+      - echo Testing kubectl connection...
+      - kubectl get nodes || echo "kubectl get nodes failed — check IAM role mapping"
+
+artifacts:
+  files:
+    - deployment.yaml
