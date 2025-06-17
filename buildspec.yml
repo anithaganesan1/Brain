@@ -29,4 +29,3 @@ phases:
       - echo Applying Kubernetes deployment...
       - kubectl apply -f deployment.yaml
       - echo Build and deploy complete.
-
