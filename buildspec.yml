@@ -5,11 +5,9 @@ phases:
     commands:
       - echo Logging in to Docker Hub...
       - echo $DOCKERHUB_PASSWORD | docker login -u $DOCKERHUB_USERNAME --password-stdin
-      
 
       - echo Logging in to Amazon ECR...
       - aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin 864981742651.dkr.ecr.ap-south-1.amazonaws.com
-
       - REPOSITORY_URI=864981742651.dkr.ecr.ap-south-1.amazonaws.com/brain-tasks-app
       - IMAGE_TAG=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
 
@@ -36,8 +34,5 @@ phases:
       - echo Updating deployment.yaml with image tag...
       - 'sed -i "s|image: .*|image: $REPOSITORY_URI:$IMAGE_TAG|" deployment.yaml'
 
-      - echo Applying Kubernetes manifests...
-      - kubectl apply -f deployment.yaml --validate=false
-
-      - echo Deployment to EKS complete
-      - kubectl get pods
+      - echo Applying Kubernetes manifest...
+      - kubectl apply -f deployment.yaml
