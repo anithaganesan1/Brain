@@ -11,7 +11,7 @@ phases:
         curl -LO "https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl"
         chmod +x kubectl
         mv kubectl /usr/local/bin/
-        kubectl version --client
+        kubectl version --client=true
 
       - echo "Installing AWS CLI..."
       - curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
@@ -27,13 +27,19 @@ phases:
       - echo "Updating kubeconfig for EKS..."
       - aws eks update-kubeconfig --region ap-south-1 --name brain-cluster
 
-      - echo "Testing kubectl connectivity..."
-      - kubectl version --client
-      - kubectl get svc || echo "kubectl not working yet"
-      - kubectl get nodes || echo "kubectl cannot access cluster nodes"
+      - export KUBECONFIG=/root/.kube/config
+
+      - echo "Showing kubeconfig:"
+      - cat /root/.kube/config
+
+      - echo "Verifying kubectl connectivity..."
+      - kubectl config get-contexts
+      - kubectl config current-context
+      - kubectl cluster-info
+      - kubectl get nodes || echo "kubectl cannot access nodes"
 
   build:
     commands:
       - echo "Deploying to EKS..."
-      - kubectl apply -f deployment.yaml --validate=false
-      - kubectl apply -f service.yaml --validate=false
+      - kubectl apply -f deployment.yaml
+      - kubectl apply -f service.yaml
