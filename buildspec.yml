@@ -6,25 +6,22 @@ phases:
       docker: 20
     commands:
       - echo Installing dependencies...
-      - yum install -y jq unzip curl
-      - echo Downloading kubectl...
-      - curl -LO "https://dl.k8s.io/release/v1.29.0/bin/linux/amd64/kubectl"
-      - chmod +x kubectl
-      - mv kubectl /usr/local/bin/
+      - yum install -y jq
+      - curl -o kubectl https://amazon-eks.s3.ap-south-1.amazonaws.com/1.29.0/2024-04-03/bin/linux/amd64/kubectl
+      - chmod +x ./kubectl
+      - mv ./kubectl /usr/local/bin
       - kubectl version --client || echo "kubectl installed"
 
   pre_build:
     commands:
-      - echo Retrieving Docker Hub credentials from Secrets Manager...
-      - export DOCKERHUB_USERNAME=$(echo $DOCKERHUB_SECRET | jq -r '.DOCKERHUB_USERNAME')
-      - export DOCKERHUB_PASSWORD=$(echo $DOCKERHUB_SECRET | jq -r '.DOCKERHUB_PASSWORD')
       - echo Logging into Docker Hub...
       - echo "$DOCKERHUB_PASSWORD" | docker login --username "$DOCKERHUB_USERNAME" --password-stdin
 
-      - echo Logging in to Amazon ECR...
+      - echo Logging into Amazon ECR...
       - aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin $REPOSITORY_URI
 
       - IMAGE_TAG=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
+      - echo "Image tag: $IMAGE_TAG"
 
   build:
     commands:
