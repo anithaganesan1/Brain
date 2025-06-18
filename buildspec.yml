@@ -23,6 +23,10 @@ phases:
     commands:
       - echo "Updating kubeconfig for EKS..."
       - aws eks update-kubeconfig --region ap-south-1 --name brain-cluster
+      - kubectl get svc || echo "kubectl not working yet"
+      - echo "Testing kubectl connectivity..."
+      - kubectl version --short
+      - kubectl get nodes
 
   build:
     commands:
