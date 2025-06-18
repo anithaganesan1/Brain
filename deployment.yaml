@@ -15,5 +15,13 @@ spec:
       containers:
       - name: brain-tasks
         image: 864981742651.dkr.ecr.ap-south-1.amazonaws.com/brain-tasks-app:latest
+        imagePullPolicy: Always
         ports:
         - containerPort: 80
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
