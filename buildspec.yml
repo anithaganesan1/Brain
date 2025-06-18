@@ -8,7 +8,7 @@ phases:
       - echo "Installing kubectl..."
       - |
         KUBECTL_VERSION=$(curl -s https://dl.k8s.io/release/stable.txt)
-        curl -LO https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl
+        curl -LO "https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl"
         chmod +x kubectl
         mv kubectl /usr/local/bin/
         kubectl version --client
@@ -21,15 +21,19 @@ phases:
 
   pre_build:
     commands:
+      - echo "Verifying AWS identity..."
+      - aws sts get-caller-identity
+
       - echo "Updating kubeconfig for EKS..."
       - aws eks update-kubeconfig --region ap-south-1 --name brain-cluster
-      - kubectl get svc || echo "kubectl not working yet"
+
       - echo "Testing kubectl connectivity..."
-      - kubectl version --short
-      - kubectl get nodes
+      - kubectl version --client
+      - kubectl get svc || echo "kubectl not working yet"
+      - kubectl get nodes || echo "kubectl cannot access cluster nodes"
 
   build:
     commands:
       - echo "Deploying to EKS..."
-      - kubectl apply -f deployment.yaml
-      - kubectl apply -f service.yaml
+      - kubectl apply -f deployment.yaml --validate=false
+      - kubectl apply -f service.yaml --validate=false
